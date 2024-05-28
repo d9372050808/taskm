@@ -3,71 +3,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import pandas as pd
-import os
+from os import stat
+from datetime import datetime
 
-import pandas as pd
-import os
+class Element:
+  index_id=0
 
-# Определяем пути к файлам и создаем DataFrame с начальными значениями
-os.makedirs('bin', exist_ok=True)
+  def __init__(self,element_type,name):
+    Element.index_id=Element.index_id+1
+    self.name=name
+    self.element_type=element_type
 
-files = {
-    'bin/projects.csv': pd.DataFrame({
-        'id': [],
-        'Project': []
-    }),
-    'bin/comments.csv': pd.DataFrame({
-        'id': [],
-        'comment': []
-    }),
-    'bin/comment_log.csv': pd.DataFrame({
-        'id': [],
-        'task_id': [],
-        'comment_id': [],
-        'date': []
-    }),
-    'bin/status_log.csv': pd.DataFrame({
-        'id': [],
-        'taskid': [],
-        'status_id': [],
-        'changedate': []
-    }),
-    'bin/status.csv': pd.DataFrame({
-        'id': [],
-        'status': []
-    }),
-    'bin/tasks.csv': pd.DataFrame({
-        'id': [],
-        'Task': [],
-        'start_date_id': [],
-        'status_id': [],
-        'tag_id': [],
-        'comment_id': [],
-        'project_id': [],
-        'value_id': [],
-        'goal_id': []
-    })
-}
+  def to_dict(self):
+    return {"index_id":self.index_id,
+            'element_type':self.element_type,
+            'name':self.name}
 
-# Функция для загрузки или создания DataFrame
-def load_or_create_dataframe(file_path, default_df):
-    if os.path.exists(file_path):
-        df = pd.read_csv(file_path)
-        if df.empty:
-            df = default_df
-    else:
-        df = default_df
-    return df
-
-# Загрузка или создание каждого DataFrame
-dataframes = {file: load_or_create_dataframe(file, df) for file, df in files.items()}
+class ElementMethod:
+  def __init__(self):
+    self.df=pd.DataFrame(columns=["index_id", "name", "element_type"])
 
 
+  def add_element(self,element_type,name):
+    new_element=Element(element_type,name)# тут создаем новый экземпляр
+    new_element_df=pd.DataFrame([new_element.to_dict()]) # тут делаем из него датафрейм
+    self.df=pd.concat([self.df,new_element_df],ignore_index=True) # тут обьединяем путой self.df и новую строку из созданного экземпляра
+    return new_element
 
-# Сохранение каждого DataFrame в CSV
-for file, df in dataframes.items():
-    df.to_csv(file, index=False)
+  def list_element(self):
+    return self.df
 
+method=ElementMethod()
 
-dataframes['bin/projects.csv']
+method.add_element('status','завтра')
+method.add_element('status','рр')
+print(method.list_element())
+
+# status=Element('status','завтра')
+# status=Element('status','сегодня')
+# # status.to_dict()
+# pd.DataFrame(status.to_dict(), pd.DataFrame(columns=["element_id", "name", "element_type"]))
